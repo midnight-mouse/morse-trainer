@@ -12,6 +12,10 @@ references = st.container()
 
 sound_module = SoundCreator()
 
+@st.cache(allow_output_mutation=True)
+def answers():
+    return []
+
 with header:
     st.title("Morse Trainer Whop!")
     st.info("Welcome to **Morse Trainer!** The aim of this app is to teach you morse code through a series of interactive levels.")
@@ -42,7 +46,7 @@ with background:
 
 with tutorial:
     st.header("Tutorial")
-    st.markdown("To learn the format of this guide, let us begin with the most important morse sequence: the emergency call **SOS**. To learn this sequence, we need two letters: **S** and **O**.")
+    st.info("To learn the format of this guide, let us begin with the most important morse sequence: the emergency call **SOS**. To learn this sequence, we need two letters: **S** and **O**.")
 
     SOS = {
         "Letter" : ["S", "O"],
@@ -73,26 +77,33 @@ with tutorial:
     audio = sound_module.create_audio_from("SOS SSO OOS SSO OSO")
     st.audio(audio, sample_rate=sound_module.sample_rate)
 
-    SOS_input = st.text_input(":blue[Type what you hear] 👇", key="SOS")
+    SOS_input = st.text_input("**:blue[Type what you hear] 👇**", key="SOS")
 
     if SOS_input:
         correct_sequence = "SSOO"
-        saved_input = st.session_state["SOS"]
 
         # Compare correct sequence with inputed sequence
         write_string = ""
 
-        for c1, c2 in zip(list(correct_sequence), list(saved_input)[:len(correct_sequence)]):
+        for c1, c2 in zip(list(correct_sequence), list(SOS_input)[:len(correct_sequence)]):
             if c1.upper() == c2.upper():
                 write_string += f":green[{c2}]"
             else:
                 write_string += f":red[{c2}]"
 
-        if len(saved_input) > len(correct_sequence):
-            write_string += f":orange[{saved_input[len(correct_sequence):]}]"
+        if len(SOS_input) > len(correct_sequence):
+            write_string += f":orange[{SOS_input[len(correct_sequence):]}]"
 
         st.write(write_string)
         st.write(f"Correct: {correct_sequence}")
+
+        answers().append(SOS_input)
+    
+    st.write(' '.join(answers()))
+
+    if st.button("reset"):
+        answers()
+
 
 with references:
     st.header("References")
